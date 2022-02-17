@@ -7,6 +7,7 @@ public class MapGenerator : MonoBehaviour
 {
     public int width;
     public int height;
+    public int depth;
 
     public float edgeSize = 1;
 
@@ -21,7 +22,7 @@ public class MapGenerator : MonoBehaviour
     [Range(1, 10)]
     public int passageRadius = 1;
 
-    int[,] map;
+    int[,,] map;
     // Start is called before the first frame update
     void Start()
     {
@@ -39,7 +40,7 @@ public class MapGenerator : MonoBehaviour
 
     void GenerateMap()
     {
-        map = new int[width, height];
+        map = new int[width, height, depth];
         RandomFillMap();
 
         for(int i = 0; i < iterations; i++)
@@ -47,14 +48,14 @@ public class MapGenerator : MonoBehaviour
             SmoothMap();
         }
 
-        ProcessMap();
+        //ProcessMap();
     }
 
     // PARAMATERISE wallThresholdSize & roomThresholdSize
     void ProcessMap()
     {
         List<List<Coord>> wallRegions = GetRegions(1);
-        int wallThresholdSize = 50;
+        int wallThresholdSize = 150;
 
         foreach(List<Coord> wallRegion in wallRegions)
         {
@@ -62,12 +63,12 @@ public class MapGenerator : MonoBehaviour
             {
                 foreach(Coord tile in wallRegion)
                 {
-                    map[tile.tileX, tile.tileY] = 0;
+                    map[tile.tileX, tile.tileY, tile.tileZ] = 0;
                 }
             }
         }
         List<List<Coord>> roomRegions = GetRegions(0);
-        int roomThresholdSize = 20;
+        int roomThresholdSize = 50;
         List<Room> remainingRooms = new List<Room>();
 
         foreach (List<Coord> roomRegion in roomRegions)
@@ -76,7 +77,7 @@ public class MapGenerator : MonoBehaviour
             {
                 foreach (Coord tile in roomRegion)
                 {
-                    map[tile.tileX, tile.tileY] = 1;
+                    map[tile.tileX, tile.tileY, tile.tileZ] = 1;
                 }
             }
             else
@@ -146,7 +147,10 @@ public class MapGenerator : MonoBehaviour
                     {
                         Coord tileA = roomA.edgeTiles[tileIndexA];
                         Coord tileB = roomB.edgeTiles[tileIndexB];
-                        int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2) + Mathf.Pow(tileA.tileY - tileB.tileY, 2));
+                        int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
+                                                        + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
+                                                        + Mathf.Pow(tileA.tileZ - tileB.tileZ, 2)
+                                                        );
 
                         if(distanceBetweenRooms < bestDist || !possibleConnectionFound)
                         {
@@ -183,27 +187,33 @@ public class MapGenerator : MonoBehaviour
         Room.ConnectRoom(roomA, roomB);
         Debug.DrawLine(CoordToWorldPoint(tileA), CoordToWorldPoint(tileB), Color.green, 100);
 
+        /*
         List<Coord> line = GetLine(tileA, tileB);
 
         foreach(Coord c in line)
         {
-            DrawCircle(c, passageRadius);
+            DrawSphere(c, passageRadius);
         }
+        */
     }
 
-    void DrawCircle(Coord c, int r)
+    void DrawSphere(Coord c, int r)
     {
         for(int x = -r; x <= r; x++)
         {
             for (int y = -r; y <= r; y++)
             {
-                if (x * x + y * y <= r * r)
+                for (int z = -r; z <= r; z++)
                 {
-                    int drawX = c.tileX + x;
-                    int drawY = c.tileY + y;
-                    if(IsInMapRange(drawX, drawY))
+                    if (x * x + y * y <= r * r)
                     {
-                        map[drawX, drawY] = 0;
+                        int drawX = c.tileX + x;
+                        int drawY = c.tileY + y;
+                        int drawZ = c.tileZ + z;
+                        if (IsInMapRange(drawX, drawY, drawZ))
+                        {
+                            map[drawX, drawY, drawZ] = 0;
+                        }
                     }
                 }
             }
@@ -216,9 +226,11 @@ public class MapGenerator : MonoBehaviour
 
         int x = from.tileX;
         int y = from.tileY;
+        int z = from.tileZ;
 
         int dx = to.tileX - from.tileX;
         int dy = to.tileY - from.tileY;
+        int dz = to.tileZ - from.tileZ;
 
         bool inverted = false;
         int step = Math.Sign(dx);
@@ -240,7 +252,7 @@ public class MapGenerator : MonoBehaviour
         int gradientAccumulation = longest / 2;
         for (int i = 0; i < longest; i++)
         {
-            line.Add(new Coord(x, y));
+            //line.Add(new Coord(x, y));
 
             if (inverted)
             {
@@ -271,26 +283,29 @@ public class MapGenerator : MonoBehaviour
 
     Vector3 CoordToWorldPoint(Coord tile)
     {
-        return new Vector3(-width / 2 + .5f + tile.tileX, 2, -height / 2 + .5f + tile.tileY);
+        return new Vector3(-width / 2 + .5f + tile.tileX, -height / 2 + .5f + tile.tileY, -depth / 2 + .5f + tile.tileZ);
     }
 
     List<List<Coord>> GetRegions(int tileType)
     {
         List<List<Coord>> regions = new List<List<Coord>>();
-        int[,] mapFlags = new int[width, height];
+        int[,,] mapFlags = new int[width, height, depth];
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if(mapFlags[x,y] == 0 && map[x,y] == tileType)
+                for (int z = 0; z < depth; z++)
                 {
-                    List<Coord> newRegion = GetRegionTiles(x, y);
-                    regions.Add(newRegion);
-
-                    foreach(Coord tile in newRegion)
+                    if (mapFlags[x, y, z] == 0 && map[x, y, z] == tileType)
                     {
-                        mapFlags[tile.tileX, tile.tileY] = 1;
+                        List<Coord> newRegion = GetRegionTiles(x, y, z);
+                        regions.Add(newRegion);
+
+                        foreach (Coord tile in newRegion)
+                        {
+                            mapFlags[tile.tileX, tile.tileY, tile.tileZ] = 1;
+                        }
                     }
                 }
             }
@@ -299,15 +314,15 @@ public class MapGenerator : MonoBehaviour
         return regions;
     }
 
-    List<Coord> GetRegionTiles(int startX, int startY)
+    List<Coord> GetRegionTiles(int startX, int startY, int startZ)
     {
         List<Coord> tiles = new List<Coord>();
-        int[,] mapFlags = new int[width, height];
-        int tileType = map[startX, startY];
+        int[,,] mapFlags = new int[width, height, depth];
+        int tileType = map[startX, startY, startZ];
 
         Queue<Coord> queue = new Queue<Coord>();
-        queue.Enqueue(new Coord(startX, startY));
-        mapFlags[startX, startY] = 1;
+        queue.Enqueue(new Coord(startX, startY, startZ));
+        mapFlags[startX, startY, startZ] = 1;
 
         while(queue.Count > 0)
         {
@@ -318,12 +333,15 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int y = tile.tileY - 1; y <= tile.tileY + 1; y++)
                 {
-                    if (IsInMapRange(x, y) && (y == tile.tileY || x == tile.tileX)) 
+                    for (int z = tile.tileZ - 1; z <= tile.tileZ + 1; z++)
                     {
-                        if(mapFlags[x,y] == 0 && map[x,y] == tileType)
+                        if (IsInMapRange(x, y, z) && (z == tile.tileZ || y == tile.tileY || x == tile.tileX))
                         {
-                            mapFlags[x, y] = 1;
-                            queue.Enqueue(new Coord(x, y));
+                            if (mapFlags[x, y, z] == 0 && map[x, y, z] == tileType)
+                            {
+                                mapFlags[x, y, z] = 1;
+                                queue.Enqueue(new Coord(x, y, z));
+                            }
                         }
                     }
                 }
@@ -333,9 +351,17 @@ public class MapGenerator : MonoBehaviour
         return tiles;
     }
 
-    bool IsInMapRange(int x, int y)
+    bool IsInMapRange(int x, int y, int z)
     {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        bool isInMap = (x >= 0
+                        && x < width
+                        && y >= 0
+                        && y < height
+                        && z  >= 0
+                        && z < depth
+                        );
+
+        return isInMap;
     }
 
     void RandomFillMap()
@@ -351,13 +377,24 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (x < edgeSize || x >= width - edgeSize || y < edgeSize || y >= height - edgeSize)
+                for (int z = 0; z < depth; z++)
                 {
-                    map[x, y] = 1;
-                }
-                else
-                {
-                    map[x, y] = (rand.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                    bool isEdge = (x < edgeSize
+                                    || x >= width - edgeSize
+                                    || y < edgeSize
+                                    || y >= height - edgeSize
+                                    || z < edgeSize
+                                    || z >= depth - edgeSize
+                                    );
+
+                    if (isEdge)
+                    {
+                        map[x, y, z] = 1;
+                    }
+                    else
+                    {
+                        map[x, y, z] = (rand.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                    }
                 }
             }
         }
@@ -369,33 +406,39 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                int neighbourWallTiles = GetSurroundingWallCount(x, y);
+                for (int z = 0; z < depth; z++)
+                {
+                    int neighbourWallTiles = GetSurroundingWallCount(x, y, z);
 
-                if (neighbourWallTiles > 4)
-                    map[x, y] = 1;
-                if (neighbourWallTiles < 4)
-                    map[x, y] = 0;
+                    if (neighbourWallTiles > 14)
+                        map[x, y, z] = 1;
+                    if (neighbourWallTiles < 14)
+                        map[x, y, z] = 0;
+                }
             }
         }
     }
 
-    int GetSurroundingWallCount(int gridX, int gridY)
+    int GetSurroundingWallCount(int gridX, int gridY, int gridZ)
     {
         int wallCount = 0;
         for (int neighbourX = gridX - 1; neighbourX <= gridX + 1; neighbourX++)
         {
             for (int neighbourY = gridY - 1; neighbourY <= gridY + 1; neighbourY++)
             {
-                if(IsInMapRange(neighbourX, neighbourY))
+                for (int neighbourZ = gridZ - 1; neighbourZ <= gridZ + 1; neighbourZ++)
                 {
-                    if(neighbourX != gridX || neighbourY != gridY)
+                    if (IsInMapRange(neighbourX, neighbourY, neighbourZ))
                     {
-                        wallCount += map[neighbourX, neighbourY];
+                        if (neighbourX != gridX || neighbourY != gridY || neighbourZ != gridZ)
+                        {
+                            wallCount += map[neighbourX, neighbourY, neighbourZ];
+                        }
                     }
-                }
-                else
-                {
-                    wallCount++;
+                    else
+                    {
+                        wallCount++;
+                    }
                 }
             }
         }
@@ -407,11 +450,13 @@ public class MapGenerator : MonoBehaviour
     {
         public int tileX;
         public int tileY;
+        public int tileZ;
 
-        public Coord(int x, int y)
+        public Coord(int x, int y, int z)
         {
             tileX = x;
             tileY = y;
+            tileZ = z;
         }
     }
 
@@ -423,9 +468,19 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Gizmos.color = (map[x, y] == 1) ? Color.black : Color.white;
-                    Vector3 pos = new Vector3(-width / 2 + x + 0.5f, 0, -height / 2 + y + 0.5f);
-                    Gizmos.DrawCube(pos, Vector3.one);
+                    for (int z = 0; z < depth; z++)
+                    {
+                        //Gizmos.color = (map[x, y] == 1) ? Color.black : Color.white;
+                        Gizmos.color = Color.black;
+
+                        if (map[x, y, z] == 0)
+                        {
+                            Vector3 pos = new Vector3(-width / 2 + x + 0.5f, -height / 2 + y + 0.5f, -depth / 2 + z + 0.5f);
+                            Gizmos.DrawCube(pos, Vector3.one);
+                        }
+
+                        
+                    }
                 }
             }
         }
@@ -445,7 +500,7 @@ public class MapGenerator : MonoBehaviour
 
         }
 
-        public Room(List<Coord> roomTiles, int[,] map)
+        public Room(List<Coord> roomTiles, int[,,] map)
         {
             tiles = roomTiles;
             roomSize = tiles.Count;
@@ -458,11 +513,14 @@ public class MapGenerator : MonoBehaviour
                 {
                     for (int y = tile.tileY - 1; y <= tile.tileY + 1; y++)
                     {
-                        if(x==tile.tileX || y == tile.tileY)
+                        for (int z = tile.tileY - 1; z <= tile.tileY + 1; z++)
                         {
-                            if(map[x,y] == 1)
+                            if (x == tile.tileX || y == tile.tileY || z == tile.tileZ)
                             {
-                                edgeTiles.Add(tile);
+                                if (map[x, y, z] == 1)
+                                {
+                                    edgeTiles.Add(tile);
+                                }
                             }
                         }
                     }
