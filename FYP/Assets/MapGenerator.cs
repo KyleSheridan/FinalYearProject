@@ -22,6 +22,8 @@ public class MapGenerator : MonoBehaviour
     [Range(1, 10)]
     public int passageRadius = 1;
 
+    public bool onlyOneRoom = true;
+
     int[,,] map;
     // Start is called before the first frame update
     void Start()
@@ -48,7 +50,7 @@ public class MapGenerator : MonoBehaviour
             SmoothMap();
         }
 
-        //ProcessMap();
+        ProcessMap();
     }
 
     // PARAMATERISE wallThresholdSize & roomThresholdSize
@@ -89,7 +91,28 @@ public class MapGenerator : MonoBehaviour
         remainingRooms[0].isMainRoom = true;
         remainingRooms[0].isAccessibleFromMainRoom = true;
 
-        ConnectClosestRooms(remainingRooms);
+        if(onlyOneRoom)
+        {
+            RemoveNotConnectedRooms(remainingRooms);
+        }
+        else
+        {
+            //ConnectClosestRooms(remainingRooms);
+        }
+    }
+
+    void RemoveNotConnectedRooms(List<Room> allRooms)
+    {
+        foreach(Room room in allRooms)
+        {
+            if(!room.isMainRoom)
+            {
+                foreach(Coord tile in room.tiles)
+                {
+                    map[tile.tileX, tile.tileY, tile.tileZ] = 1;
+                }
+            }
+        }
     }
 
     void ConnectClosestRooms(List<Room> allRooms, bool forceAccessibilityFromMainRoom = false)
