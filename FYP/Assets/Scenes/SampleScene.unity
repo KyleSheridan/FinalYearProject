@@ -157,10 +157,11 @@ MonoBehaviour:
   depth: 72
   edgeSize: 2
   iterations: 3
-  seed: 0
-  useRandomSeed: 1
-  randomFillPercent: 52
+  seed: 12
+  useRandomSeed: 0
+  randomFillPercent: 47
   passageRadius: 2
+  onlyOneRoom: 1
 --- !u!4 &58141110
 Transform:
   m_ObjectHideFlags: 0

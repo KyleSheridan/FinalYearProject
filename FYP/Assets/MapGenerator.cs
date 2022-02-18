@@ -40,7 +40,13 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    void GenerateMap()
+    public void ClearMap()
+    {
+        Array.Clear(map, 0, map.Length);
+        map = null;
+    }
+
+    public void GenerateMap()
     {
         map = new int[width, height, depth];
         RandomFillMap();
@@ -87,6 +93,9 @@ public class MapGenerator : MonoBehaviour
                 remainingRooms.Add(new Room(roomRegion, map));
             }
         }
+
+        if(remainingRooms.Count <= 0) { return; }
+
         remainingRooms.Sort();
         remainingRooms[0].isMainRoom = true;
         remainingRooms[0].isAccessibleFromMainRoom = true;
@@ -433,7 +442,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     int neighbourWallTiles = GetSurroundingWallCount(x, y, z);
 
-                    if (neighbourWallTiles > 14)
+                    if (neighbourWallTiles >= 14)
                         map[x, y, z] = 1;
                     if (neighbourWallTiles < 14)
                         map[x, y, z] = 0;
