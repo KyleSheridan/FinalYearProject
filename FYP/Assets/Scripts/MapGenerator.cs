@@ -56,6 +56,8 @@ public class MapGenerator : MonoBehaviour
             map = null;
             meshGen = GetComponent<MarchingCubes>();
             meshGen.ClearMesh();
+
+            Debug.Log("Map cleared.");
         }
     }
 
@@ -73,6 +75,8 @@ public class MapGenerator : MonoBehaviour
 
         meshGen = GetComponent<MarchingCubes>();
         meshGen.GenerateMesh(map, 1);
+
+        Debug.Log("Map generated.");
     }
 
     // PARAMATERISE wallThresholdSize & roomThresholdSize
