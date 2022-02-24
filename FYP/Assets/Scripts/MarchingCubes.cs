@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MarchingCubes : MonoBehaviour
@@ -266,6 +267,8 @@ public class MarchingCubes : MonoBehaviour
 
     public CubeGrid cubeGrid;
 
+    public bool faceNormalsOnOutside = false;
+
     List<Vector3> vertices;
     List<int> triangles;
 
@@ -298,6 +301,11 @@ public class MarchingCubes : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();
+
+        if (!faceNormalsOnOutside)
+        {
+            mesh.triangles = mesh.triangles.Reverse().ToArray();
+        }
     }
 
     void TriangulateCube(Cube cube)
@@ -354,8 +362,12 @@ public class MarchingCubes : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
+        return;
+
         if(cubeGrid != null)
         {
+            int count = 5;
+
             for (int x = 0; x < cubeGrid.cubes.GetLength(0) - 1; x++)
             {
                 for (int y = 0; y < cubeGrid.cubes.GetLength(1) - 1; y++)
@@ -364,27 +376,35 @@ public class MarchingCubes : MonoBehaviour
                     {
                         if (triTable[cubeGrid.cubes[x, y, z].configuration, 0] == -1) continue;
                         Gizmos.color = cubeGrid.cubes[x, y, z].A.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.red;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].A.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].B.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.blue;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].B.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].C.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.yellow;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].C.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].D.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.green;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].D.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].E.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.cyan;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].E.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].F.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.magenta;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].F.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].G.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.white;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].G.position, Vector3.one * .4f);
 
                         Gizmos.color = cubeGrid.cubes[x, y, z].H.active ? Color.red : Color.white;
+                        //Gizmos.color = Color.black;
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].H.position, Vector3.one * .4f);
 
                         Gizmos.color = Color.gray;
@@ -404,7 +424,8 @@ public class MarchingCubes : MonoBehaviour
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].edgeNodes[10].position, Vector3.one * .1f);
                         Gizmos.DrawCube(cubeGrid.cubes[x, y, z].edgeNodes[11].position, Vector3.one * .1f);
 
-                        return;
+                        if(count <= 0) return;
+                        count--;
                     }
                 }
             }
@@ -451,15 +472,15 @@ public class MarchingCubes : MonoBehaviour
                 {
                     for (int z = 0; z < nodeCountZ - 1; z++)
                     {
-                        cubes[x, y, z] = new Cube(controlNodes[x, y + 1, z],
-                                                controlNodes[x + 1, y + 1, z],
-                                                controlNodes[x, y, z],
-                                                controlNodes[x + 1, y, z],
-                                                controlNodes[x, y + 1, z + 1],
-                                                controlNodes[x + 1, y + 1, z + 1],
-                                                controlNodes[x, y, z + 1],
-                                                controlNodes[x + 1, y, z + 1]
-                                                );
+                        cubes[x, y, z] = new Cube(controlNodes[x    , y    , z + 1],
+                                                  controlNodes[x + 1, y    , z + 1],
+                                                  controlNodes[x + 1, y    , z    ],
+                                                  controlNodes[x    , y    , z    ],
+                                                  controlNodes[x    , y + 1, z + 1],
+                                                  controlNodes[x + 1, y + 1, z + 1],
+                                                  controlNodes[x + 1, y + 1, z    ],
+                                                  controlNodes[x    , y + 1, z    ]
+                                                  );
                     }
                 }
             }
@@ -468,17 +489,17 @@ public class MarchingCubes : MonoBehaviour
 
     public class Cube
     {
-        /*
-         *      E ----4---- F
-         *      |\ 7        |\ 5
-         *      | \        9| \
-         *     8|  H ----6---- G
-         *      |  |        |  |
-         *      A -| --0--- B  |10
-         *       \ |11       \ |
-         *      3 \|        1 \|
-         *         D ----2---- C
-         */
+        /*                          
+         *       E ----2---- F
+         *       |\ 3        |\ 1
+         *       | \       10| \
+         *     11|  H ----0---- G
+         *       |  |        |  |
+         *       A -| --6--- B  |9
+         *        \ |8        \ |
+         *       7 \|        5 \|
+         *          D ----4---- C
+         */                         
 
         public ControlNode A, B, C, D, E, F, G, H;
 
@@ -497,20 +518,20 @@ public class MarchingCubes : MonoBehaviour
             G = _G;
             H = _H;
 
-            edgeNodes[0] = A.right;
-            edgeNodes[1] = C.forward;
-            edgeNodes[2] = D.right;
-            edgeNodes[3] = D.forward;
+            edgeNodes[0] = H.right;
+            edgeNodes[1] = G.forward;
+            edgeNodes[2] = E.right;
+            edgeNodes[3] = H.forward;
 
-            edgeNodes[4] = E.right;
-            edgeNodes[5] = G.forward;
-            edgeNodes[6] = H.right;
-            edgeNodes[7] = H.forward;
+            edgeNodes[4] = D.right;
+            edgeNodes[5] = C.forward;
+            edgeNodes[6] = A.right;
+            edgeNodes[7] = D.forward;
 
-            edgeNodes[8] = A.up;
-            edgeNodes[9] = B.up;
-            edgeNodes[10] = C.up;
-            edgeNodes[11] = D.up;
+            edgeNodes[8] = D.up;
+            edgeNodes[9] = C.up;
+            edgeNodes[10] = B.up;
+            edgeNodes[11] = A.up;
 
             if (A.active)
                 configuration += 128;
