@@ -66,6 +66,13 @@ public class MapGenerator : MonoBehaviour
         map = new int[width, height, depth];
         RandomFillMap();
 
+        BrownianMotion bm = GetComponent<BrownianMotion>();
+
+        Particle particle = bm.GenerateParticle(10, 0.5f);
+
+        DrawDebugParticleLine(particle.GeneratePath(width, height, depth));
+
+
         for(int i = 0; i < iterations; i++)
         {
             SmoothMap();
@@ -77,6 +84,18 @@ public class MapGenerator : MonoBehaviour
         meshGen.GenerateMesh(map, 1);
 
         Debug.Log("Map generated.");
+    }
+
+    void DrawDebugParticleLine(List<Coord> path)
+    {
+        for (int i = 1; i < path.Count; i++)
+        {
+            Debug.DrawLine(CoordToWorldPoint(path[i-1]),
+                           CoordToWorldPoint(path[i]),
+                           Color.magenta,
+                           10
+                           );
+        }
     }
 
     // PARAMATERISE wallThresholdSize & roomThresholdSize
@@ -498,20 +517,6 @@ public class MapGenerator : MonoBehaviour
         return wallCount;
     }
 
-    struct Coord
-    {
-        public int tileX;
-        public int tileY;
-        public int tileZ;
-
-        public Coord(int x, int y, int z)
-        {
-            tileX = x;
-            tileY = y;
-            tileZ = z;
-        }
-    }
-
     private void OnDrawGizmos()
     {
         //if(map != null)
@@ -536,84 +541,5 @@ public class MapGenerator : MonoBehaviour
         //        }
         //    }
         //}
-    }
-
-    class Room : IComparable<Room>
-    {
-        public List<Coord> tiles;
-        public List<Coord> edgeTiles;
-        public List<Room> connectedRooms;
-        public int roomSize;
-        public bool isAccessibleFromMainRoom;
-        public bool isMainRoom;
-
-        public Room()
-        {
-
-        }
-
-        public Room(List<Coord> roomTiles, int[,,] map)
-        {
-            tiles = roomTiles;
-            roomSize = tiles.Count;
-            connectedRooms = new List<Room>();
-
-            edgeTiles = new List<Coord>();
-            foreach (Coord tile in tiles)
-            {
-                for (int x = tile.tileX - 1; x <= tile.tileX + 1; x++)
-                {
-                    for (int y = tile.tileY - 1; y <= tile.tileY + 1; y++)
-                    {
-                        for (int z = tile.tileY - 1; z <= tile.tileY + 1; z++)
-                        {
-                            if (x == tile.tileX || y == tile.tileY || z == tile.tileZ)
-                            {
-                                if (map[x, y, z] == 1)
-                                {
-                                    edgeTiles.Add(tile);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void SetAccessibleFromMainRoom()
-        {
-            if (!isAccessibleFromMainRoom)
-            {
-                isAccessibleFromMainRoom = true;
-                foreach(Room connectedRoom in connectedRooms)
-                {
-                    connectedRoom.SetAccessibleFromMainRoom();
-                }
-            }
-        }
-
-        public static void ConnectRoom(Room roomA, Room roomB)
-        {
-            if (roomA.isAccessibleFromMainRoom)
-            {
-                roomB.SetAccessibleFromMainRoom();
-            }
-            else if (roomB.isAccessibleFromMainRoom)
-            {
-                roomA.SetAccessibleFromMainRoom();
-            }
-            roomA.connectedRooms.Add(roomB);
-            roomB.connectedRooms.Add(roomA);
-        }
-
-        public bool IsConnected(Room otherRoom)
-        {
-            return connectedRooms.Contains(otherRoom);
-        }
-
-        public int CompareTo(Room otherRoom)
-        {
-            return otherRoom.roomSize.CompareTo(roomSize);
-        }
     }
 }

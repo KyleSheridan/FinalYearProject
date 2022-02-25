@@ -314,9 +314,6 @@ public class MarchingCubes : MonoBehaviour
         {
             Node[] points = new Node[3];
 
-            Debug.Log(cube.configuration);
-            Debug.Log(i);
-
             points[0] = cube.edgeNodes[triTable[cube.configuration, i    ]];
             points[1] = cube.edgeNodes[triTable[cube.configuration, i + 1]];
             points[2] = cube.edgeNodes[triTable[cube.configuration, i + 2]];
