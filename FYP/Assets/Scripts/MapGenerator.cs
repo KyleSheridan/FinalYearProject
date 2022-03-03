@@ -5,6 +5,19 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
+    [System.Serializable]
+    public struct ParticleParams
+    {
+        public int length;
+        [Range(0.001f, 1)]
+        public float H;
+        public int stepLength;
+        public int radius;
+        public int edgeSize;
+        [Range(0, 100)]
+        public int fillPercent;
+    }
+    
     public int width;
     public int height;
     public int depth;
@@ -26,7 +39,11 @@ public class MapGenerator : MonoBehaviour
 
     public int[,,] map { get; private set; }
 
+    public ParticleParams[] patricles;
+
     MarchingCubes meshGen;
+
+    
 
     private void Awake()
     {
@@ -66,12 +83,7 @@ public class MapGenerator : MonoBehaviour
         map = new int[width, height, depth];
         RandomFillMap();
 
-        BrownianMotion bm = GetComponent<BrownianMotion>();
-
-        Particle particle = bm.GenerateParticle(10, 0.5f);
-
-        DrawDebugParticleLine(particle.GeneratePath(width, height, depth));
-
+        GenerateParticles();
 
         for(int i = 0; i < iterations; i++)
         {
@@ -86,6 +98,22 @@ public class MapGenerator : MonoBehaviour
         Debug.Log("Map generated.");
     }
 
+    void GenerateParticles()
+    {
+        BrownianMotion bm = GetComponent<BrownianMotion>();
+
+        foreach(ParticleParams p in patricles)
+        {
+            Particle particle = bm.GenerateParticle(p.length, p.H);
+
+            List<Coord> path = particle.GeneratePath(width, height, depth, p.stepLength, p.edgeSize);
+
+            FBMAffect(path, p.radius, p.fillPercent);
+
+            DrawDebugParticleLine(path);
+        }
+    }
+
     void DrawDebugParticleLine(List<Coord> path)
     {
         for (int i = 1; i < path.Count; i++)
@@ -95,6 +123,16 @@ public class MapGenerator : MonoBehaviour
                            Color.magenta,
                            10
                            );
+        }
+    }
+
+    void FBMAffect(List<Coord> path, int r, int drawPercent)
+    {
+        foreach (Coord c in path)
+        {
+            if (!IsInMapRange(c.tileX, c.tileY, c.tileZ)) { return; }
+
+            DrawSphere(c, r, drawPercent);
         }
     }
 
@@ -268,7 +306,7 @@ public class MapGenerator : MonoBehaviour
         */
     }
 
-    void DrawSphere(Coord c, int r)
+    void DrawSphere(Coord c, int r, int drawPercent)
     {
         for(int x = -r; x <= r; x++)
         {
@@ -276,14 +314,14 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int z = -r; z <= r; z++)
                 {
-                    if (x * x + y * y <= r * r)
+                    if ((x * x) + (y * y) + (z * z) <= (r * r))
                     {
                         int drawX = c.tileX + x;
                         int drawY = c.tileY + y;
                         int drawZ = c.tileZ + z;
-                        if (IsInMapRange(drawX, drawY, drawZ))
+                        if (IsInMapRange(drawX, drawY, drawZ) && !IsEdge(drawX, drawY, drawZ))
                         {
-                            map[drawX, drawY, drawZ] = 0;
+                            map[drawX, drawY, drawZ] = (UnityEngine.Random.Range(0, 100) < drawPercent) ? 0 : 1;
                         }
                     }
                 }
@@ -428,11 +466,24 @@ public class MapGenerator : MonoBehaviour
                         && x < width
                         && y >= 0
                         && y < height
-                        && z  >= 0
+                        && z >= 0
                         && z < depth
                         );
 
         return isInMap;
+    }
+
+    bool IsEdge(int x, int y, int z)
+    {
+        bool isEdge = (x < edgeSize
+                        || x >= width - edgeSize
+                        || y < edgeSize
+                        || y >= height - edgeSize
+                        || z < edgeSize
+                        || z >= depth - edgeSize
+                        );
+
+        return isEdge;
     }
 
     void RandomFillMap()
@@ -442,7 +493,7 @@ public class MapGenerator : MonoBehaviour
             seed = Time.time.ToString();
         }
 
-        System.Random rand = new System.Random(seed.GetHashCode());
+        UnityEngine.Random.InitState(seed.GetHashCode());
 
         for (int x = 0; x < width; x++)
         {
@@ -450,21 +501,13 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    bool isEdge = (x < edgeSize
-                                    || x >= width - edgeSize
-                                    || y < edgeSize
-                                    || y >= height - edgeSize
-                                    || z < edgeSize
-                                    || z >= depth - edgeSize
-                                    );
-
-                    if (isEdge)
+                    if (IsEdge(x, y, z))
                     {
                         map[x, y, z] = 1;
                     }
                     else
                     {
-                        map[x, y, z] = (rand.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                        map[x, y, z] = (UnityEngine.Random.Range(0, 100) < randomFillPercent) ? 1 : 0;
                     }
                 }
             }
@@ -481,7 +524,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     int neighbourWallTiles = GetSurroundingWallCount(x, y, z);
 
-                    if (neighbourWallTiles >= 14)
+                    if (neighbourWallTiles > 14)
                         map[x, y, z] = 1;
                     if (neighbourWallTiles < 14)
                         map[x, y, z] = 0;
@@ -519,7 +562,7 @@ public class MapGenerator : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        //if(map != null)
+        //if (map != null)
         //{
         //    for (int x = 0; x < width; x++)
         //    {
@@ -536,10 +579,31 @@ public class MapGenerator : MonoBehaviour
         //                    Gizmos.DrawCube(pos, Vector3.one);
         //                }
 
-                        
+
         //            }
         //        }
         //    }
         //}
+
+        if (map != null)
+        {
+            Gizmos.color = Color.black;
+
+            Vector3[] corners = new Vector3[8];
+
+            corners[0] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
+            corners[1] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
+            corners[2] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
+            corners[3] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
+            corners[4] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
+            corners[5] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
+            corners[6] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
+            corners[7] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
+
+            foreach(Vector3 c in corners)
+            {
+                Gizmos.DrawCube(c, Vector3.one);
+            }
+        }
     }
 }

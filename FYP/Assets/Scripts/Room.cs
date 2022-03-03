@@ -18,6 +18,8 @@ public struct Coord
 
     public static Coord operator +(Coord a, Coord b)
         => new Coord(a.tileX + b.tileX, a.tileY + b.tileY, a.tileZ + b.tileZ);
+    public static Coord operator *(Coord a, int b)
+        => new Coord(a.tileX * b, a.tileY * b, a.tileZ * b);
 }
 
 class Room : IComparable<Room>

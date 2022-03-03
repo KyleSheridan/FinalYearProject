@@ -11,11 +11,11 @@ public class Particle
         fBMMovement = _path;
     }
 
-    public List<Coord> GeneratePath(int width, int height, int depth)
+    public List<Coord> GeneratePath(int width, int height, int depth, int stepLength, int edgeSize = 5)
     {
-        Coord startPoint = new Coord(Random.Range(0, width),
-                                     Random.Range(0, height),
-                                     Random.Range(0, depth)
+        Coord startPoint = new Coord(Random.Range(edgeSize, width - edgeSize),
+                                     Random.Range(edgeSize, height - edgeSize),
+                                     Random.Range(edgeSize, depth - edgeSize)
                                      );
 
         List<Coord> path = new List<Coord>();
@@ -26,7 +26,7 @@ public class Particle
 
         for (int i = 0; i < fBMMovement.Count; i++)
         {
-            currentPoint += fBMMovement[i];
+            currentPoint += (fBMMovement[i] * stepLength);
             path.Add(currentPoint);
         }
 
@@ -51,7 +51,12 @@ public class BrownianMotion : MonoBehaviour
 
             for (int i = 0; i < remainingLength; i++)
             {
-                if (xAxis[i] == 0 && yAxis[i] == 0 && yAxis[i] == 0)
+                bool conditions = ((xAxis[i] == 0 && yAxis[i] == 0 && zAxis[i] == 0)
+                                  || (xAxis[i] == 0 && yAxis[i] == 1 && zAxis[i] == 0)
+                                  || (xAxis[i] == 0 && yAxis[i] == -1 && zAxis[i] == 0)
+                                  );
+
+                if (conditions)
                 {
                     continue;
                 }
@@ -78,9 +83,18 @@ public class BrownianMotion : MonoBehaviour
 
     int FBMStep(float t, float s, float H)
     {
-        float val = 0.5f * (Mathf.Pow(t, 2 * H) + Mathf.Pow(s, 2 * H) - Mathf.Pow(Mathf.Abs(t - s), 2 * H));
+        if(H == 0)
+        {
+            Debug.LogError("H cannot be equal to 0");
+            return 0;
+        }
 
-        return Mathf.RoundToInt(val);
+        // add 1 to values as cannot sqrt -1
+        float FBM = 0.5f * (Mathf.Pow((t + 1), 2 * H) + Mathf.Pow((s + 1), 2 * H) - Mathf.Pow(Mathf.Abs((t + 1) - (s + 1)), 2 * H));
+
+        int val = Mathf.RoundToInt(FBM) - 1;
+
+        return Mathf.Clamp(val, -1, 1);
     }
 
     public List<float> BrownianMotionAxis(int length)
@@ -97,6 +111,6 @@ public class BrownianMotion : MonoBehaviour
 
     float RandomAxisStep()
     {
-        return Random.Range(-1, 1);
+        return Random.Range(-1, 2);
     }
 }
