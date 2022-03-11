@@ -56,15 +56,6 @@ public class MapGenerator : MonoBehaviour
         GenerateMap();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            GenerateMap();
-        }
-    }
-
     public void ClearMap()
     {
         if(map != null)
@@ -585,25 +576,25 @@ public class MapGenerator : MonoBehaviour
         //    }
         //}
 
-        if (map != null)
-        {
-            Gizmos.color = Color.black;
+        //if (map != null)
+        //{
+        //    Gizmos.color = Color.black;
 
-            Vector3[] corners = new Vector3[8];
+        //    Vector3[] corners = new Vector3[8];
 
-            corners[0] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
-            corners[1] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
-            corners[2] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
-            corners[3] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
-            corners[4] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
-            corners[5] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
-            corners[6] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
-            corners[7] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
+        //    corners[0] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
+        //    corners[1] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
+        //    corners[2] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
+        //    corners[3] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
+        //    corners[4] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
+        //    corners[5] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
+        //    corners[6] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
+        //    corners[7] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
 
-            foreach(Vector3 c in corners)
-            {
-                Gizmos.DrawCube(c, Vector3.one);
-            }
-        }
+        //    foreach(Vector3 c in corners)
+        //    {
+        //        Gizmos.DrawCube(c, Vector3.one);
+        //    }
+        //}
     }
 }

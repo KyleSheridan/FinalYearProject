@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEditor;
 
@@ -19,7 +20,14 @@ public class MapGenerationInspector : Editor
 
         if (GUILayout.Button("Generate Map"))
         {
-            generator.GenerateMap();
+            ThreadStart threadStart = delegate
+            {
+                lock (generator)
+                {
+                    generator.GenerateMap();
+                }
+            };
+            threadStart.Invoke();
         }
     }
 }
