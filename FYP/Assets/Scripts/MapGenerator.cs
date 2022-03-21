@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,8 +41,6 @@ public class MapGenerator : MonoBehaviour
     public ParticleParams[] patricles;
 
     MarchingCubes meshGen;
-
-    
 
     private void Awake()
     {
@@ -174,7 +171,7 @@ public class MapGenerator : MonoBehaviour
         }
         else
         {
-            //ConnectClosestRooms(remainingRooms);
+            ConnectClosestRooms(remainingRooms);
         }
     }
 
@@ -287,14 +284,12 @@ public class MapGenerator : MonoBehaviour
         Room.ConnectRoom(roomA, roomB);
         Debug.DrawLine(CoordToWorldPoint(tileA), CoordToWorldPoint(tileB), Color.green, 100);
 
-        /*
         List<Coord> line = GetLine(tileA, tileB);
 
         foreach(Coord c in line)
         {
-            DrawSphere(c, passageRadius);
+            DrawSphere(c, passageRadius, 100);
         }
-        */
     }
 
     void DrawSphere(Coord c, int r, int drawPercent)
@@ -332,49 +327,132 @@ public class MapGenerator : MonoBehaviour
         int dy = to.tileY - from.tileY;
         int dz = to.tileZ - from.tileZ;
 
-        bool inverted = false;
-        int step = Math.Sign(dx);
-        int gradientStep = Math.Sign(dy);
+        //bool inverted = false;
+        //int step = Math.Sign(dx);
+        //int gradientStep = Math.Sign(dy);
 
-        int longest = Mathf.Abs(dx);
-        int shortest = Mathf.Abs(dy);
+        //int longest = Mathf.Abs(dx);
+        //int shortest = Mathf.Abs(dy);
+        
+        //dy / dx
+        bool invertedY = false;
+        int stepY = Math.Sign(dx);
+        int gradientStepY = Math.Sign(dy);
 
-        if(longest < shortest)
+        int longestY = Mathf.Abs(dx);
+        int shortestY = Mathf.Abs(dy);
+
+
+        if (longestY < shortestY)
         {
-            inverted = true;
-            longest = Mathf.Abs(dy);
-            shortest = Mathf.Abs(dx);
+            invertedY = true;
+            longestY = Mathf.Abs(dy);
+            shortestY = Mathf.Abs(dx);
 
-            step = Math.Sign(dy);
-            gradientStep = Math.Sign(dx);
+            stepY = Math.Sign(dy);
+            gradientStepY = Math.Sign(dx);
         }
 
-        int gradientAccumulation = longest / 2;
-        for (int i = 0; i < longest; i++)
-        {
-            //line.Add(new Coord(x, y));
 
-            if (inverted)
+        //dz / dx
+        bool invertedZ = false;
+        int stepZ = Math.Sign(dx);
+        int gradientStepZ = Math.Sign(dz);
+
+        int longestZ = Mathf.Abs(dx);
+        int shortestZ = Mathf.Abs(dz);
+
+        if (longestZ < shortestZ)
+        {
+            invertedZ = true;
+            longestZ = Mathf.Abs(dz);
+            shortestZ = Mathf.Abs(dx);
+
+            stepZ = Math.Sign(dz);
+            gradientStepZ = Math.Sign(dx);
+        }
+
+        if (invertedY)
+        {
+            invertedZ = false;
+            stepZ = Math.Sign(dy);
+            gradientStepZ = Math.Sign(dz);
+
+            longestZ = Mathf.Abs(dy);
+            shortestZ = Mathf.Abs(dz);
+
+            if (longestZ < shortestZ)
             {
-                y += step;
+                invertedZ = true;
+                longestZ = Mathf.Abs(dz);
+                shortestZ = Mathf.Abs(dy);
+
+                stepZ = Math.Sign(dz);
+                gradientStepZ = Math.Sign(dy);
+            }
+        }
+
+        int gradientAccumulationY = longestY / 2;
+        int gradientAccumulationZ = longestZ / 2;
+        for (int i = 0; i < longestY; i++)
+        {
+            line.Add(new Coord(x, y, z));
+
+            //if (invertedY)
+            //{
+            //    y += stepY;
+            //}
+            //else
+            //{
+            //    x += stepY;
+            //}
+
+            if (invertedZ)
+            {
+                z += stepZ;
+            }
+            else if (invertedY)
+            {
+                y += stepY;
             }
             else
             {
-                x += step;
+                x += stepY;
             }
 
-            gradientAccumulation += shortest;
-            if(gradientAccumulation >= longest)
+            gradientAccumulationY += shortestY;
+            if(gradientAccumulationY >= longestY)
             {
-                if (inverted)
+                if (invertedY)
                 {
-                    x += gradientStep;
+                    x += gradientStepY;
                 }
                 else
                 {
-                    y += gradientStep;
+                    y += gradientStepY;
                 }
-                gradientAccumulation -= longest;
+                gradientAccumulationY -= longestY;
+            }
+            
+            gradientAccumulationZ += shortestZ;
+            if(gradientAccumulationZ >= longestZ)
+            {
+                if (invertedZ)
+                {
+                    if (invertedY)
+                    {
+                        y += gradientStepZ;
+                    }
+                    else
+                    {
+                        z += gradientStepZ;
+                    }
+                }
+                else
+                {
+                    z += gradientStepZ;
+                }
+                gradientAccumulationZ -= longestZ;
             }
         }
 
