@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class MapGenerator : MonoBehaviour
     public int passageRadius = 1;
 
     public bool onlyOneRoom = true;
+    public bool connectRooms = false;
 
     public int[,,] map { get; private set; }
 
@@ -50,7 +52,19 @@ public class MapGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GenerateMap();
+        //Profiler.BeginSample("MapGeneration");
+        //GenerateMap();
+        //Profiler.EndSample();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            Profiler.BeginSample("MapGeneration");
+            GenerateMap();
+            Profiler.EndSample();
+        }
     }
 
     public void ClearMap()
@@ -169,7 +183,7 @@ public class MapGenerator : MonoBehaviour
         {
             RemoveNotConnectedRooms(remainingRooms);
         }
-        else
+        else if(connectRooms)
         {
             ConnectClosestRooms(remainingRooms);
         }
@@ -353,7 +367,6 @@ public class MapGenerator : MonoBehaviour
             gradientStepY = Math.Sign(dx);
         }
 
-
         //dz / dx
         bool invertedZ = false;
         int stepZ = Math.Sign(dx);
@@ -394,7 +407,15 @@ public class MapGenerator : MonoBehaviour
 
         int gradientAccumulationY = longestY / 2;
         int gradientAccumulationZ = longestZ / 2;
-        for (int i = 0; i < longestY; i++)
+
+        int longest = longestY;
+
+        if (invertedZ)
+        {
+            longest = longestZ;
+        }
+
+        for (int i = 0; i < longest; i++)
         {
             line.Add(new Coord(x, y, z));
 
@@ -445,7 +466,7 @@ public class MapGenerator : MonoBehaviour
                     }
                     else
                     {
-                        z += gradientStepZ;
+                        x += gradientStepZ;
                     }
                 }
                 else
