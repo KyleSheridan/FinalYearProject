@@ -3,17 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Coord
+public abstract class Node
+{
+    public Vector3Int pos;
+}
+
+public class Coord : Node
 {
     public int tileX;
     public int tileY;
     public int tileZ;
+
+    public Coord()
+    {
+
+    }
 
     public Coord(int x, int y, int z)
     {
         tileX = x;
         tileY = y;
         tileZ = z;
+
+        pos = new Vector3Int(x, y, z);
     }
 
     public static Coord operator +(Coord a, Coord b)
