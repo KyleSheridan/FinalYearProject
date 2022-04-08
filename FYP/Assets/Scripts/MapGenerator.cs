@@ -252,31 +252,51 @@ public class MapGenerator : MonoBehaviour
                 {
                     continue;
                 }
-                for(int tileIndexA = 0; tileIndexA < roomA.edgeTiles.Count; tileIndexA++)
-                {
-                    for (int tileIndexB = 0; tileIndexB < roomB.edgeTiles.Count; tileIndexB++)
-                    {
-                        Coord tileA = roomA.edgeTiles[tileIndexA];
-                        Coord tileB = roomB.edgeTiles[tileIndexB];
-                        int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
-                                                        + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
-                                                        + Mathf.Pow(tileA.tileZ - tileB.tileZ, 2)
-                                                        );
+                //for(int tileIndexA = 0; tileIndexA < roomA.edgeTiles.Count; tileIndexA++)
+                //{
+                //    for (int tileIndexB = 0; tileIndexB < roomB.edgeTiles.Count; tileIndexB++)
+                //    {
+                //        Coord tileA = roomA.edgeTiles[tileIndexA];
+                //        Coord tileB = roomB.edgeTiles[tileIndexB];
+                //        int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
+                //                                        + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
+                //                                        + Mathf.Pow(tileA.tileZ - tileB.tileZ, 2)
+                //                                        );
 
-                        if(distanceBetweenRooms < bestDist || !possibleConnectionFound)
-                        {
-                            bestDist = distanceBetweenRooms;
-                            possibleConnectionFound = true;
-                            bestTileA = tileA;
-                            bestTileB = tileB;
-                            bestRoomA = roomA;
-                            bestRoomB = roomB;
-                        }
-                    }
+                //        if(distanceBetweenRooms < bestDist || !possibleConnectionFound)
+                //        {
+                //            bestDist = distanceBetweenRooms;
+                //            possibleConnectionFound = true;
+                //            bestTileA = tileA;
+                //            bestTileB = tileB;
+                //            bestRoomA = roomA;
+                //            bestRoomB = roomB;
+                //        }
+                //    }
+                //}
+
+                Coord tileA = roomA.edgeNodes.FindClosest(roomB.edgeNodes.pos) as Coord;
+                Coord tileB = roomB.edgeNodes.FindClosest(roomA.edgeNodes.pos) as Coord;
+                //Coord tileB = roomB.edgeNodes.FindClosest(tileA.pos) as Coord;
+                //tileA = roomA.edgeNodes.FindClosest(tileB.pos) as Coord;
+
+                int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
+                                               + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
+                                               + Mathf.Pow(tileA.tileZ - tileB.tileZ, 2)
+                                               );
+
+                if (distanceBetweenRooms < bestDist || !possibleConnectionFound)
+                {
+                    bestDist = distanceBetweenRooms;
+                    possibleConnectionFound = true;
+                    bestTileA = tileA;
+                    bestTileB = tileB;
+                    bestRoomA = roomA;
+                    bestRoomB = roomB;
                 }
             }
 
-            if(possibleConnectionFound && !forceAccessibilityFromMainRoom)
+            if (possibleConnectionFound && !forceAccessibilityFromMainRoom)
             {
                 CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
             }

@@ -87,10 +87,10 @@ public class BVHNode : Node
 
     //    pos = new Vector3Int(x, y, z);
     //}
-    
-    BVHNode(List<Node> srcObjects)
+
+    public BVHNode(List<Coord> srcObjects)
     {
-        List<Node> objects = srcObjects;
+        List<Coord> objects = srcObjects;
 
         int axis = UnityEngine.Random.Range(0, 3);
 
@@ -132,7 +132,6 @@ public class BVHNode : Node
         }
         else
         {
-            // will not work as sorting whole list of nodes
             objects.Sort(comparator);
 
             int mid = objectSpan / 2;
@@ -146,5 +145,12 @@ public class BVHNode : Node
         int z = Mathf.Abs(objects[0].pos.z - objects[objects.Count - 1].pos.z);
 
         pos = new Vector3Int(x, y, z);
+    }
+    public override Node FindClosest(Vector3Int target)
+    {
+        float leftDist = Vector3Int.Distance(left.pos, target);
+        float rightDist = Vector3Int.Distance(right.pos, target);
+
+        return leftDist < rightDist ? left.FindClosest(target) : right.FindClosest(target);
     }
 }

@@ -6,6 +6,8 @@ using UnityEngine;
 public abstract class Node
 {
     public Vector3Int pos;
+
+    public abstract Node FindClosest(Vector3Int target);
 }
 
 public class Coord : Node
@@ -28,6 +30,11 @@ public class Coord : Node
         pos = new Vector3Int(x, y, z);
     }
 
+    public override Node FindClosest(Vector3Int target)
+    {
+        return this;
+    }
+
     public static Coord operator +(Coord a, Coord b)
         => new Coord(a.tileX + b.tileX, a.tileY + b.tileY, a.tileZ + b.tileZ);
     public static Coord operator *(Coord a, int b)
@@ -39,6 +46,9 @@ class Room : IComparable<Room>
     public List<Coord> tiles;
     public List<Coord> edgeTiles;
     public List<Room> connectedRooms;
+
+    public BVHNode edgeNodes;
+
     public int roomSize;
     public bool isAccessibleFromMainRoom;
     public bool isMainRoom;
@@ -74,6 +84,8 @@ class Room : IComparable<Room>
                 }
             }
         }
+
+        edgeNodes = new BVHNode(edgeTiles);
     }
 
     public void SetAccessibleFromMainRoom()
