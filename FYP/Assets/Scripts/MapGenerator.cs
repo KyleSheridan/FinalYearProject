@@ -401,6 +401,8 @@ public class MapGenerator : MonoBehaviour
             longestZ = Mathf.Abs(dz);
             shortestZ = Mathf.Abs(dx);
 
+            longestY = Mathf.Abs(dz);
+
             stepZ = Math.Sign(dz);
             gradientStepZ = Math.Sign(dx);
         }
@@ -413,6 +415,8 @@ public class MapGenerator : MonoBehaviour
 
             longestZ = Mathf.Abs(dy);
             shortestZ = Mathf.Abs(dz);
+
+            longestY = Mathf.Abs(dy);
 
             if (longestZ < shortestZ)
             {
