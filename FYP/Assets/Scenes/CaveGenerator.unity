@@ -2802,7 +2802,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
-      value: 0
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 3635222858335936392, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Name
@@ -3522,7 +3522,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
-      value: 0
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3635222858335936392, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Name
@@ -5141,6 +5141,10 @@ PrefabInstance:
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Value
       value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
+      propertyPath: m_MaxValue
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
@@ -6969,7 +6973,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3635222858335936392, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Name
@@ -7611,6 +7615,10 @@ PrefabInstance:
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Value
       value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
+      propertyPath: m_MaxValue
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
@@ -9116,6 +9124,10 @@ PrefabInstance:
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_Value
       value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
+      propertyPath: m_MaxValue
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3341824612116252753, guid: 0e9c36c425e105649a1e79d679191276, type: 3}
       propertyPath: m_MinValue
