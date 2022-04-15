@@ -71,7 +71,7 @@ class Room : IComparable<Room>
             {
                 for (int y = tile.tileY - 1; y <= tile.tileY + 1; y++)
                 {
-                    for (int z = tile.tileY - 1; z <= tile.tileY + 1; z++)
+                    for (int z = tile.tileZ - 1; z <= tile.tileZ + 1; z++)
                     {
                         if (x == tile.tileX || y == tile.tileY || z == tile.tileZ)
                         {

@@ -64,7 +64,7 @@ public class ButtonManager : MonoBehaviour
             }
         }
 
-        generator.edgeSize = 2;
+        generator.edgeSize = 4;
 
         generator.useRandomSeed = useRandomSeed.isOn;
         generator.seed = seed.text;

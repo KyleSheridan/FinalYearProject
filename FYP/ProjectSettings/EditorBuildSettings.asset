@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/CaveGenerator.unity
+    guid: 4de416901a384df4eb63a3ba5590146b
   m_configObjects: {}
