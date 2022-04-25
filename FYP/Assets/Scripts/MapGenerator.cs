@@ -44,19 +44,6 @@ public class MapGenerator : MonoBehaviour
 
     MarchingCubes meshGen;
 
-    private void Awake()
-    {
-        
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        //Profiler.BeginSample("MapGeneration");
-        //GenerateMap();
-        //Profiler.EndSample();
-    }
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.K))
@@ -138,7 +125,6 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    // PARAMATERISE wallThresholdSize & roomThresholdSize
     void ProcessMap()
     {
         List<List<Coord>> wallRegions = GetRegions(1);
@@ -252,33 +238,9 @@ public class MapGenerator : MonoBehaviour
                 {
                     continue;
                 }
-                //for(int tileIndexA = 0; tileIndexA < roomA.edgeTiles.Count; tileIndexA++)
-                //{
-                //    for (int tileIndexB = 0; tileIndexB < roomB.edgeTiles.Count; tileIndexB++)
-                //    {
-                //        Coord tileA = roomA.edgeTiles[tileIndexA];
-                //        Coord tileB = roomB.edgeTiles[tileIndexB];
-                //        int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
-                //                                        + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
-                //                                        + Mathf.Pow(tileA.tileZ - tileB.tileZ, 2)
-                //                                        );
-
-                //        if(distanceBetweenRooms < bestDist || !possibleConnectionFound)
-                //        {
-                //            bestDist = distanceBetweenRooms;
-                //            possibleConnectionFound = true;
-                //            bestTileA = tileA;
-                //            bestTileB = tileB;
-                //            bestRoomA = roomA;
-                //            bestRoomB = roomB;
-                //        }
-                //    }
-                //}
 
                 Coord tileA = roomA.edgeNodes.FindClosest(roomB.edgeNodes.pos) as Coord;
                 Coord tileB = roomB.edgeNodes.FindClosest(roomA.edgeNodes.pos) as Coord;
-                //Coord tileB = roomB.edgeNodes.FindClosest(tileA.pos) as Coord;
-                //tileA = roomA.edgeNodes.FindClosest(tileB.pos) as Coord;
 
                 int distanceBetweenRooms = (int)(Mathf.Pow(tileA.tileX - tileB.tileX, 2)
                                                + Mathf.Pow(tileA.tileY - tileB.tileY, 2)
@@ -360,13 +322,6 @@ public class MapGenerator : MonoBehaviour
         int dx = to.tileX - from.tileX;
         int dy = to.tileY - from.tileY;
         int dz = to.tileZ - from.tileZ;
-
-        //bool inverted = false;
-        //int step = Math.Sign(dx);
-        //int gradientStep = Math.Sign(dy);
-
-        //int longest = Mathf.Abs(dx);
-        //int shortest = Mathf.Abs(dy);
         
         //dy / dx
         bool invertedY = false;
@@ -442,15 +397,6 @@ public class MapGenerator : MonoBehaviour
         for (int i = 0; i < longest; i++)
         {
             line.Add(new Coord(x, y, z));
-
-            //if (invertedY)
-            //{
-            //    y += stepY;
-            //}
-            //else
-            //{
-            //    x += stepY;
-            //}
 
             if (invertedZ)
             {
@@ -672,52 +618,5 @@ public class MapGenerator : MonoBehaviour
         }
 
         return wallCount;
-    }
-
-    private void OnDrawGizmos()
-    {
-        //if (map != null)
-        //{
-        //    for (int x = 0; x < width; x++)
-        //    {
-        //        for (int y = 0; y < height; y++)
-        //        {
-        //            for (int z = 0; z < depth; z++)
-        //            {
-        //                //Gizmos.color = (map[x, y] == 1) ? Color.black : Color.white;
-        //                Gizmos.color = Color.black;
-
-        //                if (map[x, y, z] == 0)
-        //                {
-        //                    Vector3 pos = new Vector3(-width / 2 + x + 0.5f, -height / 2 + y + 0.5f, -depth / 2 + z + 0.5f);
-        //                    Gizmos.DrawCube(pos, Vector3.one);
-        //                }
-
-
-        //            }
-        //        }
-        //    }
-        //}
-
-        //if (map != null)
-        //{
-        //    Gizmos.color = Color.black;
-
-        //    Vector3[] corners = new Vector3[8];
-
-        //    corners[0] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
-        //    corners[1] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f, -depth / 2 + 0.5f);
-        //    corners[2] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
-        //    corners[3] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f, -depth / 2 + 0.5f);
-        //    corners[4] = new Vector3(-width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
-        //    corners[5] = new Vector3( width / 2 + 0.5f, -height / 2 + 0.5f,  depth / 2 + 0.5f);
-        //    corners[6] = new Vector3(-width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
-        //    corners[7] = new Vector3( width / 2 + 0.5f,  height / 2 + 0.5f,  depth / 2 + 0.5f);
-
-        //    foreach(Vector3 c in corners)
-        //    {
-        //        Gizmos.DrawCube(c, Vector3.one);
-        //    }
-        //}
     }
 }
